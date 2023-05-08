@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "SolidPy"
+  site-url: "https://Bullish-Design.github.io/SolidPy"
+  description: "Python API for Solidworks"
+  repo-branch: main
+  repo-url: "https://github.com/Bullish-Design/SolidPy"
