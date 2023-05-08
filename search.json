@@ -1,0 +1,163 @@
+[
+  {
+    "objectID": "10_component.html",
+    "href": "10_component.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .interfaces.icomponent import IComponent\n\n\nclass Component(IComponent):\n    def __init__(self, system_object):\n        super().__init__(system_object)\n\n    def __repr__(self):\n        return f\"{self.__class__.__name__} &lt;{self.name}&gt;\"\n\n    def __str__(self):\n        return self.name\n\n    def get_children(self):\n        return [\n            Component(system_object) for system_object in self._get_children()\n        ]\n\n    def get_parent(self):\n        return Component(self._get_parent())"
+  },
+  {
+    "objectID": "12_assemblydoc.html",
+    "href": "12_assemblydoc.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .10_component import Component\nfrom .04_modeldoc import ModelDoc\nfrom .interfaces.iassemblydoc import IAssemblyDoc\n\n\nclass AssemblyDoc(IAssemblyDoc, ModelDoc):\n    def __init__(self, system_object):\n        super().__init__(system_object)\n\n    def get_components(self, top_level_only: bool = True):\n        return [\n            Component(system_object)\n            for system_object in self._get_components(top_level_only)\n        ]"
+  },
+  {
+    "objectID": "09_custompropertymanager.html",
+    "href": "09_custompropertymanager.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .interfaces.icustompropertymanager import ICustomPropertyManager\nfrom .enums.enum_types import CustomInfoType\nfrom .enums.enum_options import CustomPropertyAddOption\nfrom .enums.enum_results import (\n    CustomInfoAddResult,\n    CustomInfoDeleteResult,\n    CustomInfoGetResult,\n    CustomInfoSetResult,\n    CustomLinkSetResult,\n)\n\n\nclass CustomPropertyManager(ICustomPropertyManager):\n    def __init__(self, parent, config_name):\n        super().__init__(parent, config_name)\n\n    def get_all(self):\n        \"\"\"Gets all the custom properties for the current active configuration\n\n        Returns:\n            List of Tuples: A list of tuples; each containing the following:\n                1. Property Name,\n                2. Property Type,\n                3. Property Value,\n                4. Resolved - A result code,\n                5. Property Link\n\n        \"\"\"\n        arg1, arg2, arg3, arg4, arg5 = self.get_all3()\n        return list(\n            zip(\n                arg5.value,\n                CustomInfoType(arg4.value),\n                arg3.value,\n                CustomInfoGetResult(arg2.value),\n                arg1.value,\n            )\n        )\n\n    def add(self, field_name, field_type, field_value, overwrite_existing):\n        \"\"\"Adds custom property to the current active configurations\n\n        Args:\n            field_name (str): The name of the property field\n            field_type (str): The data type of the property field.\n            field_value (str): The value of the property field\n            overwrite_existing (str): The conditions by which to add the\n                property field.\n\n        Returns:\n            Enum: A value indicating the outcome of the method.\n        \"\"\"\n\n        _field_type = CustomInfoType[field_type.upper().replace(\" \", \"_\")].value\n        _overwrite_existing = CustomPropertyAddOption[\n            overwrite_existing.upper().replace(\" \", \"_\")\n        ].value\n\n        retval = self._add3(field_name, _field_type, field_value, _overwrite_existing)\n\n        return CustomInfoAddResult(retval)\n\n    def delete(self, field_name):\n\n        retval = self._delete2(field_name)\n        return CustomInfoDeleteResult(retval)\n\n    def get(\n        self,\n        field_name,\n        use_cached,\n        val_out,\n        resolved_val_out,\n        was_resolved,\n        link_to_property,\n    ):\n        retval = self._get6(\n            field_name,\n            use_cached,\n            val_out,\n            resolved_val_out,\n            was_resolved,\n            link_to_property,\n        )\n        return CustomInfoGetResult(retval)\n\n    def set_(self, field_name, field_value):\n        retval = self._set2(field_name, field_value)\n        return CustomInfoSetResult(retval)\n\n    def get_type(self, field_name):\n        retval = self._get_type2(field_name)\n        return CustomInfoType(retval)\n\n    def is_custom_property_editable(self, property_name, configuration_name):\n        retval = self._is_custom_property_editable(property_name, configuration_name)\n        return bool(retval)\n\n    def link_property(self, field_name, field_link):\n        retval = self._link_property(field_name, field_link)\n        return CustomLinkSetResult(retval)"
+  },
+  {
+    "objectID": "05_featuremanager.html",
+    "href": "05_featuremanager.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "import win32com.client\nimport pythoncom\n\nfrom .interfaces.ifeaturemanager import IFeatureManager\nfrom .feature import Feature\n\n\nclass FeatureManager(IFeatureManager):\n    def __init__(self, parent):\n        super().__init__(parent)\n\n    def get_features(self, top_level_only=True):\n        return [\n            Feature(system_object)\n            for system_object in self._get_features(top_level_only)\n        ]"
+  },
+  {
+    "objectID": "02_partdoc.html",
+    "href": "02_partdoc.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .modeldoc import ModelDoc\nfrom .interfaces.ipartdoc import IPartDoc\n\n\nclass PartDoc(IPartDoc, ModelDoc):\n    def __init__(self, system_object):\n        self.system_object = system_object"
+  },
+  {
+    "objectID": "08_doc.html",
+    "href": "08_doc.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .assemblydoc import AssemblyDoc\nfrom .com import COM\nfrom .drawingdoc import DrawingDoc\nfrom .enums.enum_types import DocumentTypes\nfrom .partdoc import PartDoc\n\n\nclass Doc:\n    class __Doc:\n        def __init__(self, system_object=None):\n            self.system_object = system_object\n            del self\n\n        @property\n        def _instance(self):\n            if self.system_object is None:\n                self.system_object = COM(\"SldWorks.Application\").ActiveDoc\n            return self.system_object\n\n        @property\n        def _doc_type(self):\n            return self._instance.GetType\n\n        @property\n        def doc(self):\n            if self._doc_type == DocumentTypes.ASSEMBLY.value:\n                return AssemblyDoc(self._instance)\n            elif self._doc_type == DocumentTypes.PART.value:\n                return PartDoc(self._instance)\n            elif self._doc_type == DocumentTypes.DRAWING.value:\n                return DrawingDoc(self._instance)\n            else:\n                raise ValueError(self._doc_type)\n\n    def __new__(cls, system_object=None):\n        return cls.__Doc(system_object).doc"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "A Python version of the solidworks API. This is a work in progress and is not yet ready for use."
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "SolidPy",
+    "section": "Install",
+    "text": "Install\npip install SolidPy"
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "SolidPy",
+    "section": "How to use",
+    "text": "How to use\nStill working on it. For now, feel free to poke around and help out if you can."
+  },
+  {
+    "objectID": "01_solidworks.html",
+    "href": "01_solidworks.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "\"\"\"This module creates an python interface to Solidworks\"\"\"\n\nimport os\nimport subprocess as sb\n\nimport win32com.client\n\n# from .assemblydoc import AssemblyDoc\nfrom .doc import Doc\nfrom .interfaces.isldworks import ISldWorks\nfrom .enums.enum_options import OpenDocOptions\nfrom .enums.enum_types import DocumentTypes\n\n\nclass SolidWorks(ISldWorks):\n    \"\"\"SolidWorks creates an interface to the current primary SolidWorks\n    session.\n\n    Note:\n        If no SolidWorks session currently exist, a session will be created\n        upon instantiation. Note that this session will be running in the\n        background and its existiance will not be apparent. To make this\n        session visible, set its visibility attribute :attr:'visible' to True.\n\n    \"\"\"\n\n    def __init__(self):\n        super().__init__()\n\n    def __repr__(self):\n        return f\"&lt;{self.__class__.__name__}&gt;&lt;{self.pid}&gt;\"\n\n    def __str__(self):\n        return f\"{self.__class__.__name__}\"\n\n    @staticmethod\n    def start(*args):\n        \"\"\"Starts a SolidWorks session.\n\n        This method starts a new SolidWorks Session. It is equivalent to\n        launching SolidWorks manually and all add-in, user-preference, etc.\n        will be loaded using this method. If SolidWorks session with all the\n        user preferences loaded is desired. Launch the session using this\n        static method proir to instantiating an instance of :class:'SolidWorks'\n\n        Args:\n            version (int, optional): Last 2-digits of the year of the\n            SolidWorks instance you would like to use. If there is only one\n            version of SolidWorks installed on your machine DO NOT enter an\n            arguement\n\n        Examples: SolidWorks.start(20)\n        \"\"\"\n\n        if not args:\n            SW_PROCESS_NAME = (\n                r\"C:/Program Files/SOLIDWORKS Corp/SOLIDWORKS/SLDWORKS.exe\"\n            )\n            sb.Popen(SW_PROCESS_NAME)\n        else:\n            year = int(args[0][-1])\n            SW_PROCESS_NAME = f\"SldWorks.Application.{(20 + (year - 2))}\"\n            win32com.client.Dispatch(SW_PROCESS_NAME)\n\n    @staticmethod\n    def kill():\n        \"\"\"Force kill SLDWORKS.exe process.\n\n        This method will force kill the current solidworks session. This method\n        is independ of the SolidWorks API and terminates the SolidWorks session\n        killing the the SLDWORKS.exe process.\n\n        'kill()' should be used in the case that SolidWorks is not responding.\n        The prefered method for shutting down the SolidWorks session is\n        'shutdown()'\n        \"\"\"\n        sb.call(\"Taskkill /IM SLDWORKS.exe /F\")\n\n    @property\n    def pid(self):\n        \"\"\"Returns SolidWorks process ID\"\"\"\n        return self._get_process_id()\n\n    @property\n    def visible(self):\n        return self._get_visible()\n\n    @visible.setter\n    def visible(self, state: bool = True):\n        return self._set_visible(state)\n\n    @property\n    def frame_state(self):\n        return self._get_frame_state()\n\n    @frame_state.setter\n    def frame_state(self, state):\n        self._set_frame_state(state)\n\n    def open(self, path: str, options: str = \"silent\", configuration: str = str()):\n        \"\"\"Opens a native SolidWorks documents\n\n        Args:\n            path (str): The path of the SolidWorks file you want to load\n            options (int, optional): The mode you wish to open the document in.\n            Defaults to 1. See SolidWorks API for alternate options\n            configuration (str, optional): The configuration of the model to be\n            opened. Defaults to str() which opens the lasted opened\n            configuration\n\n        Raises:\n            ValueError: File must me a SolidWorks native file. Acceptable\n            file extensions include [.SLDPRT, .SLDASM, .SLDDRW]\n\n        Returns:\n            Error: Error raised while opening the document\n            Warning: Warnings returned while opening the document\n        \"\"\"\n\n        if os.path.splitext(path)[1] == \".SLDPRT\":\n            type_value = DocumentTypes.PART.value\n        elif os.path.splitext(path)[1] == \".SLDASM\":\n            type_value = DocumentTypes.ASSEMBLY.value\n        elif os.path.splitext(path)[1] == \".SLDDRW\":\n            type_value = DocumentTypes.DRAWING.value\n        else:\n            raise ValueError(\"Incompatible File Type\")\n\n        _options = OpenDocOptions[options.upper().replace(\" \", \"_\")].value\n        pointer, error, warning = self._opendoc6(\n            path, type_value, _options, configuration\n        )\n        return Doc(pointer), error, warning\n\n    def shutdown(self):\n        \"\"\"Exits the SolidWorks session\n\n        shutdown is the prefered method for terminating as solidworks session\n        \"\"\"\n        self.exit_app()\n\n    def get_model(self):\n        \"\"\"Returns the model document currently active in the SolidWorks session\n\n        Returns:\n            :class:`swtoolkit.api.ModelDoc`: A SolidWorks model or document\n        \"\"\"\n        return Doc()\n\n    def get_models(self):\n        \"\"\"Returns all the model documents currently loaded in the SolidWorks\n        session\n\n        Returns:\n            List of :class:`swtoolkit.api.ModelDoc`: A list of all the\n            model/documents loaded in the SolidWorks session\n        \"\"\"\n        return [Doc(system_object) for system_object in self._get_documents()]\n\n    def close_all_documents(self, include_unsaved: bool = False):\n        \"\"\"Closes all open documents\n\n        :param include_unsaved: Include unsaved documents is function execution\n        :type include_unsaved: bool\n        :return: Execution feedback. True if successeful\n        :rtype: bool\n        \"\"\"\n\n        return self._close_all_documents(include_unsaved)"
+  },
+  {
+    "objectID": "swapi.html",
+    "href": "swapi.html",
+    "title": "SWapi",
+    "section": "",
+    "text": "source\n\nfoo\n\n foo ()"
+  },
+  {
+    "objectID": "03_modeldocextension.html",
+    "href": "03_modeldocextension.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "import win32com.client\n\nfrom .interfaces.imodeldocextension import IModelDocExtension\n\n\nclass ModelDocExtension(IModelDocExtension):\n    def __init__(self, parent):\n        super().__init__(parent)"
+  },
+  {
+    "objectID": "06_feature.html",
+    "href": "06_feature.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .interfaces.ifeature import IFeature\n\n\nclass Feature(IFeature):\n    def __init__(self, system_object):\n        super().__init__(system_object)\n\n    def __repr__(self):\n        return f\"{self.__class__.__name__} &lt;{self.name}&gt; &lt;{self.identity}&gt;\"\n\n    def __str__(self):\n        return f\"{self.name}\""
+  },
+  {
+    "objectID": "04_modeldoc.html",
+    "href": "04_modeldoc.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .interfaces.imodeldoc import IModelDoc\nfrom .enums.enum_options import StandardViews, SaveAsOptions\nfrom .enums.enum_types import DocumentTypes\n\n\nclass ModelDoc(IModelDoc):\n    def __init__(self, system_object=None):\n        super().__init__(system_object)\n\n    def __repr__(self):\n        return f\"{self.__class__.__name__} &lt;{self.title}&gt;\"\n\n    def __str__(self):\n        return self.title\n\n    @property\n    def title(self) -&gt; str:\n        \"\"\"Returns the title of the document or model.\"\"\"\n        return self._get_title()\n\n    @property\n    def type(self):\n        \"\"\"Returns the document or model type.\"\"\"\n        return DocumentTypes(self._get_type())\n\n    @property\n    def path(self) -&gt; str:\n        \"\"\"Returns the path of the document or model.\"\"\"\n        return self._get_path_name()\n\n    def save(self, options: str = \"silent\"):\n        \"\"\"Saves the current ModelDoc object\n\n        Args:\n            options (str, optional): Save as options. Defaults to \"silent\".\n\n        Returns:\n            Tuple: True if save is successful, followed by Errors and Warnings\n        \"\"\"\n        _options = SaveAsOptions[options.upper().replace(\" \", \"_\")].value\n        retval, err, warn = self.save3(_options)\n        return retval, err.value, warn.value\n\n    def set_view(self, view_name: str, fit: bool = False):\n        \"\"\"Allows the model view to be selected\n\n        Args:\n            view_name (str): Name of the view to show.\n            fit (bool, optional): Fits model to viewport if True.\n\n        Example:\n            model.show_view('Isometric')\n        \"\"\"\n        _view_id = StandardViews[view_name.upper().replace(\" \", \"_\")].value\n        self.show_named_view2(str(), _view_id)\n        if fit:\n            self.zoom_to_fit()\n\n    def zoom_to_fit(self):\n        \"\"\"Fits model to viewport.\"\"\"\n        self.view_zoom_to_fit2()"
+  },
+  {
+    "objectID": "11_com.html",
+    "href": "11_com.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .interfaces.icomponent import IComponent\n\n\nclass Component(IComponent):\n    def __init__(self, system_object):\n        super().__init__(system_object)\n\n    def __repr__(self):\n        return f\"{self.__class__.__name__} &lt;{self.name}&gt;\"\n\n    def __str__(self):\n        return self.name\n\n    def get_children(self):\n        return [\n            Component(system_object) for system_object in self._get_children()\n        ]\n\n    def get_parent(self):\n        return Component(self._get_parent())"
+  },
+  {
+    "objectID": "enums/enum_types.html",
+    "href": "enums/enum_types.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "\"\"\"Contains enumerations for SolidWorks Types.\"\"\"\n\nfrom enum import Enum\n\n\nclass DocumentTypes(Enum):\n    ASSEMBLY = 2\n    DRAWING = 3\n    IMPORTED_ASSEMBLY = 7\n    IMPORTED_PART = 6\n    LAYOUT = 5\n    NONE = 0\n    PART = 1\n    SDM = 4\n\n\nclass CustomInfoType(Enum):\n    DATE = 64\n    DOUBLE = 5\n    NUMBER = 3\n    TEXT = 30\n    UNKNOWN = 0\n    YES_OR_NO = 11"
+  },
+  {
+    "objectID": "enums/enum_errors.html",
+    "href": "enums/enum_errors.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "\"\"\"Contains enumerations for SolidWorks Errors.\"\"\"\n\nfrom enum import Enum\n\n\nclass FileSaveError(Enum):\n    FILE_LOCK_ERROR = 16\n    FILE_NAME_CONTAINS_AT_SIGN = 8\n    FILE_NAME_EMPTY = 4\n    FILE_SAVE_AS_BAD_EDRAWINGS_VERSION = 1024\n    FILE_SAVE_AS_DO_NOT_OVERWRITE = 128\n    FILE_SAVE_AS_INVALID_FILE_EXTENSION = 256\n    FILE_SAVE_AS_NO_SELECTION = 512\n    FILE_SAVE_AS_NOT_SUPPORTED = 4096\n    FILE_SAVE_FORMAT_NOT_AVAILABLE = 32\n    FILE_SAVE_REQUIRES_SAVING_REFERENCES = 8192\n    GENERIC_SAVE_ERROR = 1\n    READ_ONLY_SAVE_ERROR = 2\n\n\nclass FileLoadError(Enum):\n    ADDIN_INTERUPT_ERROR = 1048576\n    FILE_NOT_FOUND_ERROR = 2\n    FILE_WITH_SAME_TITLE_ALREADY_OPEN = 65536\n    FUTURE_VERSION = 8192\n    GENERIC_ERROR = 1\n    INVALID_FILE_TYPE_ERROR = 1024\n    LIQUID_MACHINE_DOC = 131072\n    LOW_RESOURCES_ERROR = 262144\n    NO_DISPLAY_DATA = 524288"
+  },
+  {
+    "objectID": "enums/enum_warnings.html",
+    "href": "enums/enum_warnings.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "\"\"\"Contains enumerations for SolidWorks Warnings.\"\"\"\n\nfrom enum import Enum\n\n\nclass FileSaveWarning(Enum):\n    ANIMATOR_CAMERA_VIEWS = 128\n    ANIMATOR_FEATURE_EDITS = 16\n    ANIMATOR_LIGHT_EDITS = 64\n    ANIMATOR_NEED_TO_SOLVE = 8\n    ANIMATOR_SECTION_VIEWS = 256\n    EDRWINGS_BAD_SELECTION = 32\n    MISSING_OLE_OBJECTS = 512\n    NEEDS_REBUILD = 2\n    OPENED_VIEW_ONLY = 1024\n    REBUILD_ERROR = 1\n    VIEWS_NEED_UPDATE = 4\n\n\nclass FileLoadWarning(Enum):\n    ALREADY_OPEN = 128\n    BASE_PART_NOT_LOADED = 64\n    COMPONENT_MISSING_REFERENCED_CONFIG = 32768\n    DIMENSIONS_REFERENCED_INCORRECTLY_TO_MODELS = 16384\n    DRAWING_ANSI_UPDATE = 8\n    DRAWING_SF_SYMBOL_CONVERT = 2048\n    DRAWINGS_ONLY_RAPID_DRAFT = 256\n    ID_MISMATCH = 1\n    INVISIBLE_DOC_LINKED_DESIGN_TABLE_UPDATE_FAIL = 65536\n    MISSING_DESIGN_TABLE = 131072\n    MODEL_OUT_OF_DATE = 8192\n    NEEDS_REGEN = 32\n    READ_ONLY = 2\n    RESOLVE_DIM_TOLERANCE = 4096\n    SHARING_VIOLATION = 4\n    SHEET_SCALE_UPDATE = 16\n    VIEW_MISSING_REFERENCED_CONFIG = 1024\n    VIEW_ONLY_RESTRICTIONS = 512"
+  },
+  {
+    "objectID": "enums/enum_options.html",
+    "href": "enums/enum_options.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "\"\"\"Contains enumerations for SolidWorks options.\n\"\"\"\n\nfrom enum import Enum\n\n\nclass OpenDocOptions(Enum):\n    LIGHTWEIGHT = 32\n    RAPID_DRAFT = 8\n    READ_ONLY = 2\n    SILENT = 1\n    LARGE_DESIGN_REVIEW = 4\n\n\nclass SummInfoField(Enum):\n    AUTHOR = 2\n    COMMENT = 4\n    CREATE_DATE = 6\n    CREATE_DATE2 = 8\n    KEYWORDS = 3\n    SAVE_DATE = 7\n    SAVE_DATE2 = 9\n    SAVED_BY = 5\n    SUBJECT = 1\n    TITLE = 0\n\n\nclass StandardViews(Enum):\n    BACK = 2\n    BOTTOM = 6\n    DIMETRIC = 9\n    FRONT = 1\n    ISOMETRIC = 7\n    LEFT = 3\n    RIGHT = 4\n    TOP = 5\n    TRIMETRIC = 8\n\n\nclass SaveAsOptions(Enum):\n    AVOID_REBUILD_ON_SAVE = 8\n    COPY = 2\n    DETACHED_DRAWING = 128\n    IGNORE_BIOGRAPHY = 256\n    OVERRIDE_SAVE_EMODEL = 32\n    SAVE_REFERENCED = 4\n    SILENT = 1\n    UPDATE_INACTIVE_VIEWS = 16\n\n\nclass CustomPropertyAddOption(Enum):\n    DELETE_AND_ADD = 1\n    ONLY_IF_NEW = 0\n    REPLACE_VALUE = 2"
+  },
+  {
+    "objectID": "enums/enum_results.html",
+    "href": "enums/enum_results.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "\"\"\"Contains enumerations for SolidWorks Results.\"\"\"\n\nfrom enum import Enum\n\n\nclass CustomInfoAddResult(Enum):\n    ADDED_OR_CHANGED = 0\n    GENERIC_FAIL = 1\n    MISMATCH_AGAINST_EXISTING_TYPE = 2\n    MISMATCH_AGAINSTE_SPECIFIC_TYPE = 3\n\n\nclass CustomInfoDeleteResult(Enum):\n    LINKED_PROP = 2\n    NOT_PRESENT = 1\n    OK = 0\n\n\nclass CustomInfoGetResult(Enum):\n    CACHED_VALUE = 0\n    NOT_PRESENT = 1\n    RESOLVED_VALUE = 2\n\n\nclass CustomInfoSetResult(Enum):\n    LINKED_PROP = 3\n    NOT_PRESENT = 1\n    OK = 0\n    TYPE_MISMATCH = 2\n\n\nclass CustomLinkSetResult(Enum):\n    LEGACY = 2\n    NOT_PRESENT = 1\n    OK = 0\n    USER_PROP = 3"
+  },
+  {
+    "objectID": "enums/enum_states.html",
+    "href": "enums/enum_states.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "\"\"\"Contains enumerations for SolidWorks States.\"\"\"\n\nfrom enum import Enum\n\n\nclass ComponentSuppressionState(Enum):\n    FULLY_LIGHTWEIGHT = 4  # Recursive\n    FULLY_RESOLVED = 2  # Recursive\n    INTERNAL_ID_MISMATCH = 5\n    LIGHTWEIGHT = 1\n    RESOLVED = 3\n    SUPPRESSED = 0"
+  },
+  {
+    "objectID": "07_drawingdoc.html",
+    "href": "07_drawingdoc.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "from .modeldoc import ModelDoc\nfrom .interfaces.idrawingdoc import IDrawingDoc\n\n\nclass DrawingDoc(IDrawingDoc, ModelDoc):\n    def __init__(self, system_object):\n        super().__init__(system_object)"
+  },
+  {
+    "objectID": "interfaces/iassemblydoc.html",
+    "href": "interfaces/iassemblydoc.html",
+    "title": "SolidPy",
+    "section": "",
+    "text": "import win32com.client\nimport pythoncom\n\n\nclass IAssemblyDoc:\n    def __init__(self, system_object):\n        self.system_object = system_object\n\n    @property\n    def _instance(self):\n        return self.system_object\n\n    def _get_components(self, top_level_only: bool):\n        \"\"\"Gets all of the components in the active configuration of this\n        assembly.\n\n        Args:\n            top_level_only (bool): True to get only the top-level components of\n            the FeatureManager design tree, false to get both the top-level and\n            child components in the FeatureManager design tree\n\n        Returns:\n            COM Object: [description]\n        \"\"\"\n        arg = win32com.client.VARIANT(pythoncom.VT_BOOL, top_level_only)\n        return self._instance.GetComponents(arg)\n\n    def _get_component_by_id(self, component_id: int):\n        \"\"\"Gets a top-level assembly component using its component ID.\n\n        Args:\n            component_id (int): Component ID of top-level assembly component\n\n        Returns:\n            System_object: Top-level component\n        \"\"\"\n        arg = win32com.client.VARIANT(pythoncom.VT_I4, component_id)\n        return self._instance.GetComponentsByID(arg)"
+  }
+]
