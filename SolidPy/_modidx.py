@@ -5,4 +5,5 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://Bullish-Design.github.io',
                 'git_url': 'https://github.com/Bullish-Design/SolidPy',
                 'lib_path': 'SolidPy'},
-  'syms': {'SolidPy.core': {'SolidPy.core.foo': ('core.html#foo', 'SolidPy/core.py')}}}
+  'syms': { 'SolidPy.SWapi': {'SolidPy.SWapi.foo': ('swapi.html#foo', 'SolidPy/SWapi.py')},
+            'SolidPy.core': {'SolidPy.core.foo': ('core.html#foo', 'SolidPy/core.py')}}}
