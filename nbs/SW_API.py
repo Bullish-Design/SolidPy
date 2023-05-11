@@ -7,7 +7,7 @@ import shutil
 import pythoncom
 
 # import SW_API_FeatureParsing as SWparse
-import dendron_py.Solidworks.SW_API_Functions as SWapi
+import SW_API_Functions as SWapi
 
 # # swConst = win32com.client.gencache.EnsureModule('{4687F359-55D0-4CD3-B6CF-2EB42C11F989}', 0, 29, 0).constants # sw2015
 # # swCmd = win32com.client.gencache.EnsureModule('{0AC1DE9F-3FBC-4C25-868D-7D4E9139CCE0}', 0, 29, 0).constants
