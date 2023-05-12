@@ -1,0 +1,55 @@
+Option Explicit
+
+Sub main()
+
+    Dim swApp As SldWorks.SldWorks
+    Dim swModel As SldWorks.ModelDoc2
+    Dim swDesignTable As SldWorks.DesignTable2
+    Dim FilePath As String
+    Dim FileName As String
+    Dim CSVPath As String
+    Dim ExcelApp As Object
+    Dim Workbook As Object
+    Dim Worksheet As Object
+    Dim Range As Object
+    Dim TableArray As Variant
+    Dim i As Long
+    
+    Set swApp = Application.SldWorks
+    Set swModel = swApp.ActiveDoc
+    
+    If Not swModel Is Nothing Then
+        Set swDesignTable = swModel.GetDesignTable2
+        If Not swDesignTable Is Nothing Then
+            FilePath = swModel.GetPathName
+            FileName = swModel.GetTitle
+            CSVPath = Left(FilePath, InStrRev(FilePath, "\")) & FileName & ".csv"
+            
+            ' Open CSV file in Excel
+            Set ExcelApp = CreateObject("Excel.Application")
+            Set Workbook = ExcelApp.Workbooks.Open(CSVPath)
+            Set Worksheet = Workbook.Sheets(1)
+            Set Range = Worksheet.UsedRange
+            
+            ' Read CSV data into array
+            TableArray = Range.Value
+            
+            ' Update design table
+            For i = 1 To UBound(TableArray, 1)
+                swDesignTable.EditTable2
+                swDesignTable.SetCellText i, 1, TableArray(i, 1)
+                swDesignTable.UpdateTable 2, True
+            Next i
+            
+            ' Close Excel
+            Workbook.Close False
+            ExcelApp.Quit
+            
+        Else
+            MsgBox "The active document does not contain a design table."
+        End If
+    Else
+        MsgBox "No active document."
+    End If
+
+End Sub
