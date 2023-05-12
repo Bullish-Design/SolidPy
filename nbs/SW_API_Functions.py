@@ -64,7 +64,7 @@ sw = win32com.client.Dispatch("SldWorks.Application")
 
 @dataclass
 class Solidworks:
-    def __post_init__(self):
+    def __init__(self):
         self.instance = win32com.client.Dispatch("SldWorks.Application")
 
     pass
