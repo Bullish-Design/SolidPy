@@ -4,7 +4,7 @@
 __all__ = ['Plane', 'converUnits_XYZ', 'convertUnits']
 
 # %% ../nbs/13_plane.ipynb 1
-import constants.constants 
+import SolidPy.constants.constants 
 
 class Plane:
     def __init__(self, swModel, name, refPlane, offsetDistance, distanceUnits):
