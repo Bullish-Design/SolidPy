@@ -1,0 +1,40 @@
+Option Explicit
+
+Sub main()
+
+    Dim swApp As SldWorks.SldWorks
+    Dim macroName As String
+    Dim filePath As String
+    Dim fileName as String
+    Dim fileLoc As String
+
+    Set swApp = Application.SldWorks
+    
+    fileName = "design_table_export.txt"
+
+    ' Define the path to your text file
+    fileLoc = "C:\Users\alaureijs\Local Projects\SolidPy\SolidPy\SolidPy"
+    
+    filePath = fileLoc & "\" & fileName
+
+    ' Read the macro name from the text file
+    macroName = ReadFromTextFile(filePath)
+    
+    ' Execute the macro
+    swApp.RunMacro2 macroName, "", "", "", 0
+
+End Sub
+
+Function ReadFromTextFile(filePath As String) As String
+
+    Dim fileContent As String
+    Dim fileNumber As Integer
+    
+    fileNumber = FreeFile
+    Open filePath For Input As fileNumber
+    Input #fileNumber, fileContent
+    Close fileNumber
+    
+    ReadFromTextFile = fileContent
+
+End Function

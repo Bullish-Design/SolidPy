@@ -4,7 +4,7 @@
 __all__ = ['Dimension']
 
 # %% ../nbs/14_dimension.ipynb 1
-import SolidPy.constants.constants
+from .constants.constants import *
 
 class Dimension:
     def __init__(self, swModel, dimName, sketchName, units):
