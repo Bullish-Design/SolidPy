@@ -124,4 +124,5 @@ d = { 'settings': { 'branch': 'main',
                                                                                 'SolidPy/solidworks.py'),
                                     'SolidPy.solidworks.SolidWorks.start': ('solidworks.html#solidworks.start', 'SolidPy/solidworks.py'),
                                     'SolidPy.solidworks.SolidWorks.visible': ( 'solidworks.html#solidworks.visible',
-                                                                               'SolidPy/solidworks.py')}}}
+                                                                               'SolidPy/solidworks.py')},
+            'SolidPy.sw_design_table_py': {}}}
